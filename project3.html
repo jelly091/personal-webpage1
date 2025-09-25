@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhanced Login + Scientific Calculator</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+  }
+
+  canvas#mathBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
+
+  .box, .calculator {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 25px;
+    border-radius: 20px;
+    width: 320px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    color: #00ffd5;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .toggle-pass {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #00ffd5;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #00ffd5, #00aaff);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(90deg, #00aaff, #00ffd5);
+  }
+
+  a {
+    color: #00ffd5;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .calculator {
+    width: 340px;
+  }
+
+  .display {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #00ffd5;
+    font-size: 20px;
+    border: none;
+    border-radius: 8px;
+    text-align: right;
+    padding: 10px;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .buttons button {
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #00ffd5;
+    box-shadow: 0 0 5px rgba(0, 255, 213, 0.5);
+    transition: transform 0.1s, background 0.3s;
+  }
+
+  .buttons button:hover {
+    background: rgba(0, 255, 213, 0.2);
+    transform: scale(1.1);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="mathBackground"></canvas>
+
+<div id="authSection">
+  <div class="box" id="signupBox">
+    <h2>Create Account</h2>
+    <form onsubmit="return signUp()">
+      <div class="input-group">
+        <input type="text" id="newUsername" placeholder="Username" required>
+      </div>
+      <div class="input-group">
+        <input type="password" id="newPassword" placeholder="Password" required>
+        <span class="toggle-pass" onclick="togglePassword('newPassword', this)">👁</span>
+      </div>
+      <button type="submit">Sign Up</button>
+    </form>
+    <p style="margin-top:10px;">Already registered? <a onclick="showLogin()">Login here</a></p>
+  </div>
+
+  <div class="box" id="loginBox" style="display:none;">
+    <h2>Login</h2>
+    <form onsubmit="return login()">
+      <div class="input-group">
+        <input type="text" id="username" placeholder="Username" required>
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Password" required>
+        <span class="toggle-pass" onclick="togglePassword('password', this)">👁</span>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <p style="margin-top:10px;">No account? <a onclick="showSignup()">Sign Up</a></p>
+  </div>
+</div>
+
+<div class="calculator" id="calculator" style="display:none;">
+  <input type="text" id="calcDisplay" class="display" disabled>
+  <div class="buttons">
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button onclick="press('/')">÷</button>
+    <button onclick="press('sqrt(')">√</button>
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button onclick="press('*')">×</button>
+    <button onclick="press('^')">^</button>
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button onclick="press('-')">−</button>
+    <button onclick="press('sin(')">sin</button>
+    <button onclick="press('0')">0</button>
+    <button onclick="press('.')">.</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="press('+')">+</button>
+    <button onclick="press('cos(')">cos</button>
+    <button onclick="press('tan(')">tan</button>
+    <button onclick="press('(')">(</button>
+    <button onclick="press(')')">)</button>
+    <button onclick="press('log(')">log</button>
+    <button onclick="clearDisplay()">C</button>
+  </div>
+</div>
+
+<script>
+  function showLogin() {
+    document.getElementById("signupBox").style.display = "none";
+    document.getElementById("loginBox").style.display = "block";
+  }
+  function showSignup() {
+    document.getElementById("signupBox").style.display = "block";
+    document.getElementById("loginBox").style.display = "none";
+  }
+  function togglePassword(id, el) {
+    let field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+    el.textContent = field.type === "password" ? "👁" : "🙈";
+  }
+  let accounts = JSON.parse(localStorage.getItem("accounts")) || {};
+  function saveAccounts() { localStorage.setItem("accounts", JSON.stringify(accounts)); }
+  function signUp() {
+    let user = document.getElementById("newUsername").value;
+    let pass = document.getElementById("newPassword").value;
+    let passReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+    if (!passReg.test(pass)) {
+      alert("Password must have uppercase, lowercase, numbers, and symbols (min 6 chars)!");
+      return false;
+    }
+    accounts[user] = pass;
+    saveAccounts();
+    alert("Account created! Please log in.");
+    showLogin();
+    return false;
+  }
+  function login() {
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+    if (accounts[user] === pass) {
+      alert("Login successful!");
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("calculator").style.display = "block";
+    } else {
+      alert("Invalid username or password!");
+    }
+    return false;
+  }
+  let display = document.getElementById("calcDisplay");
+  function press(val) { display.value += val; }
+  function clearDisplay() { display.value = ""; }
+  function calculate() {
+    try {
+      let exp = display.value
+        .replace(/sqrt/g, "Math.sqrt")
+        .replace(/sin/g, "Math.sin")
+        .replace(/cos/g, "Math.cos")
+        .replace(/tan/g, "Math.tan")
+        .replace(/log/g, "Math.log")
+        .replace(/\^/g, "**");
+      display.value = eval(exp);
+    } catch { display.value = "Error"; }
+  }
+  document.addEventListener("keydown", e => {
+    const allowed = "0123456789+-*/().";
+    if (allowed.includes(e.key)) press(e.key);
+    else if (e.key === "Enter") calculate();
+    else if (e.key === "Backspace") display.value = display.value.slice(0, -1);
+  });
+
+  // Particle background
+  const canvasBG = document.getElementById("mathBackground");
+  const ctxBG = canvasBG.getContext("2d");
+  canvasBG.width = window.innerWidth;
+  canvasBG.height = window.innerHeight;
+
+  let particles = [];
+  const colors = ["#00ffd5", "#00aaff", "#ffffff"];
+  const maxParticles = 120;
+  const mouse = { x: null, y: null };
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvasBG.width;
+      this.y = Math.random() * canvasBG.height;
+      this.size = Math.random() * 3 + 1;
+      this.speedX = Math.random() * 1 - 0.5;
+      this.speedY = Math.random() * 1 - 0.5;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvasBG.width) this.speedX *= -1;
+      if (this.y < 0 || this.y > canvasBG.height) this.speedY *= -1;
+    }
+    draw() {
+      ctxBG.beginPath();
+      ctxBG.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctxBG.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+      ctxBG.fill();
+    }
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < maxParticles; i++) {
+      particles.push(new Particle());
+    }
+  }
+  initParticles();
+
+  function connectParticles() {
+    let opacityValue = 0.2;
+    for (let a = 0; a < particles.length; a++) {
+      for (let b = a; b < particles.length; b++) {
+        let dx = particles[a].x - particles[b].x;
+        let dy = particles[a].y - particles[b].y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 100) {
+          ctxBG.strokeStyle = `rgba(0, 255, 213, ${opacityValue})`;
+          ctxBG.lineWidth = 1;
+          ctxBG.beginPath();
+          ctxBG.moveTo(particles[a].x, particles[a].y);
+          ctxBG.lineTo(particles[b].x, particles[b].y);
+          ctxBG.stroke();
+        }
+      }
+    }
+  }
+
+  function animateParticles() {
+    ctxBG.clearRect(0, 0, canvasBG.width, canvasBG.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    connectParticles();
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  window.addEventListener("resize", () => {
+    canvasBG.width = window.innerWidth;
+    canvasBG.height = window.innerHeight;
+    initParticles();
+  });
+
+  window.addEventListener("mousemove", e => {
+    mouse.x = e.x;
+    mouse.y = e.y;
+  });
+</script>
+</body>
+</html>

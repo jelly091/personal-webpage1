@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Hologram Dash with JPG</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  html,body{
+    margin:0;
+    height:100%;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  canvas{
+    width:100%;
+    height:auto;
+    max-width:960px;
+    border-radius:12px;
+    background:#000;
+    box-shadow:0 0 40px rgba(0,255,255,0.5);
+  }
+</style>
+</head>
+<body>
+<canvas id="game" width="960" height="320"></canvas>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const DPR = window.devicePixelRatio || 1;
+canvas.width = canvas.clientWidth * DPR;
+canvas.height = canvas.clientHeight * DPR;
+ctx.scale(DPR,DPR);
+
+let playing=false,lastTime=0,score=0,speed=7,obstacles=[];
+let gravity=0.9;
+let hue=0; // hologram color cycle
+
+// === Load your character image (JPG) ===
+let playerImg = new Image();
+playerImg.src = "image.jpg";  // <-- put your JPG file in the same folder as this HTML
+let imageLoaded = false;
+playerImg.onload = () => { imageLoaded = true; };
+
+// Cube replaced with image
+let cube={
+  x:80,
+  y:0,
+  w:60,  // image width
+  h:60,  // image height
+  vy:0,
+  baseY:canvas.clientHeight/2+80,
+  jumping:false,
+  draw(color){
+    ctx.save();
+    ctx.translate(this.x,this.y);
+    ctx.shadowBlur=20;
+    ctx.shadowColor=color;
+
+    if(imageLoaded){
+      ctx.drawImage(playerImg,0,0,this.w,this.h);
+    }else{
+      // fallback cube if image not loaded
+      ctx.fillStyle=color;
+      ctx.fillRect(0,0,this.w,this.h);
+    }
+
+    ctx.restore();
+  },
+  update(){
+    this.vy+=gravity;
+    this.y+=this.vy;
+    if(this.y>this.baseY-this.h){
+      this.y=this.baseY-this.h;
+      this.vy=0;
+      this.jumping=false;
+    }
+  },
+  jump(){
+    if(this.jumping)return;
+    this.vy=-16;
+    this.jumping=true;
+  },
+  bounds(){return{x:this.x,y:this.y,w:this.w,h:this.h};}
+};
+
+// Obstacles
+function makeSpike(){
+  return {
+    x:canvas.clientWidth+20,
+    y:cube.baseY,
+    w:30,
+    h:30,
+    draw(color){
+      ctx.save();
+      ctx.fillStyle=color;
+      ctx.shadowBlur=20;
+      ctx.shadowColor=color;
+      ctx.beginPath();
+      ctx.moveTo(this.x,this.y);
+      ctx.lineTo(this.x+this.w/2,this.y-this.h);
+      ctx.lineTo(this.x+this.w,this.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    },
+    update(dt){this.x-=speed*(dt/16);},
+    off(){return this.x+this.w<-20;},
+    bounds(){return{x:this.x,y:this.y-this.h,w:this.w,h:this.h};}
+  };
+}
+
+// Collision check
+function collide(a,b){
+  return !(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);
+}
+
+function loop(now){
+  if(!playing)return;
+  let dt=now-lastTime;lastTime=now;
+  score+=Math.floor(dt/16);
+  hue=(hue+1)%360; // cycle color
+
+  if(Math.random()<0.015){obstacles.push(makeSpike());}
+
+  cube.update();
+  obstacles.forEach(o=>o.update(dt));
+  obstacles=obstacles.filter(o=>!o.off());
+
+  for(let o of obstacles){
+    if(collide(cube.bounds(),o.bounds())){playing=false;}
+  }
+
+  render();
+  requestAnimationFrame(loop);
+}
+
+function render(){
+  let w=canvas.clientWidth,h=canvas.clientHeight;
+  ctx.clearRect(0,0,w,h);
+
+  let color=`hsl(${hue},100%,50%)`;
+
+  // Background glow
+  let g=ctx.createRadialGradient(w/2,h/2,50,w/2,h/2,w/1.2);
+  g.addColorStop(0,"rgba(0,0,0,0.2)");
+  g.addColorStop(1,"rgba(0,0,0,1)");
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,w,h);
+
+  // Grid lines
+  ctx.strokeStyle=color;
+  ctx.shadowBlur=10;
+  ctx.shadowColor=color;
+  for(let x=0;x<w;x+=40){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();
+  }
+  for(let y=0;y<h;y+=40){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+  }
+  ctx.shadowBlur=0;
+
+  // Ground
+  ctx.fillStyle=color;
+  ctx.shadowBlur=15;
+  ctx.shadowColor=color;
+  ctx.fillRect(0,cube.baseY,w,4);
+  ctx.shadowBlur=0;
+
+  // Draw player + obstacles
+  cube.draw(color);
+  obstacles.forEach(o=>o.draw(color));
+
+  // HUD
+  ctx.fillStyle=color;
+  ctx.font="18px monospace";
+  ctx.shadowBlur=10;
+  ctx.shadowColor=color;
+  ctx.fillText("Score: "+score,10,25);
+  ctx.shadowBlur=0;
+
+  if(!playing){
+    ctx.fillStyle="rgba(0,0,0,0.7)";
+    ctx.fillRect(0,0,w,h);
+    ctx.fillStyle=color;
+    ctx.font="28px monospace";
+    ctx.textAlign="center";
+    ctx.shadowBlur=20;
+    ctx.shadowColor=color;
+    ctx.fillText("Click / Space to Start",w/2,h/2);
+    ctx.textAlign="start";
+    ctx.shadowBlur=0;
+  }
+}
+
+function resetGame(){
+  obstacles=[];
+  score=0;
+  speed=7;
+  cube.y=cube.baseY-cube.h;
+  cube.vy=0;
+  cube.jumping=false;
+  playing=true;
+  lastTime=performance.now();
+  requestAnimationFrame(loop);
+}
+
+// Controls
+window.addEventListener("keydown",e=>{
+  if(e.code==="Space"||e.code==="ArrowUp"){
+    if(!playing){resetGame();}else{cube.jump();}
+  }
+});
+canvas.addEventListener("mousedown",()=>{
+  if(!playing){resetGame();}else{cube.jump();}
+});
+
+render();
+</script>
+</body>
+</html>

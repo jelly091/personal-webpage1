@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Class Schedule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      /* Animated gradient background */
+      body {
+        background: linear-gradient(-45deg, #1e3c72, #2a5298, #10a37f, #202123);
+        background-size: 400% 400%;
+        animation: gradientBG 12s ease infinite;
+        color: #fff;
+      }
+      @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      /* Glass effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        padding: 15px;
+      }
+
+      /* Navbar */
+      .navbar {
+        backdrop-filter: blur(12px);
+        background: rgba(0,0,0,0.6) !important;
+      }
+
+      /* Table styling */
+      .table {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .table thead {
+        background: rgba(0, 123, 255, 0.6);
+      }
+      .table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transition: 0.3s;
+      }
+
+      /* Buttons hover */
+      .btn:hover {
+        transform: scale(1.05);
+        transition: 0.2s;
+      }
+
+      /* Sidebar buttons */
+      .btn-outline-info, .btn-outline-secondary, .btn-outline-dark, .btn-outline-primary {
+        border-radius: 8px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+      }
+      .btn-outline-info:hover, .btn-outline-secondary:hover, 
+      .btn-outline-dark:hover, .btn-outline-primary:hover {
+        background: rgba(255,255,255,0.3);
+      }
+
+      /* Reminders list */
+      .list-group-item {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        cursor: pointer;
+      }
+      .list-group-item:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Footer */
+      footer {
+        background: rgba(0,0,0,0.7) !important;
+        backdrop-filter: blur(10px);
+      }
+    </style>
+  </head>
+  <body>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" data-bs-theme="dark">
+      <div class="container">
+        <a class="navbar-brand fw-bold text-success" href="#">🌐 Class Portal</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+          data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
+          aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+          <ul class="navbar-nav mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Schedule</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">More</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Assignments</a></li>
+                <li><a class="dropdown-item" href="#">Grades</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+              </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link disabled">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Class Schedule Table -->
+    <div class="container my-5 glass">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover text-center align-middle">
+          <caption class="caption-top text-center fs-4 fw-bold text-light">📅 Class Schedule</caption>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Monday</th>
+              <th>Tuesday</th>
+              <th>Wednesday</th>
+              <th>Thursday</th>
+              <th>Friday</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>08:00 - 09:00</th>
+              <td>Math</td><td>English</td><td>Science</td><td>Math</td><td>PE</td>
+              <td>
+                <button class="btn btn-sm btn-warning">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <th>09:00 - 10:00</th>
+              <td>Science</td><td>Math</td><td>English</td><td>Computer</td><td>Arts</td>
+              <td>
+                <button class="btn btn-sm btn-warning">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <th>10:00 - 11:00</th>
+              <td>English</td><td>Science</td><td>PE</td><td>Math</td><td>Homeroom</td>
+              <td>
+                <button class="btn btn-sm btn-warning">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+            <tr class="fw-bold">
+              <th>11:00 - 12:00</th>
+              <td colspan="5">🍱 Lunch Break</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <th>01:00 - 02:00</th>
+              <td>Computer</td><td>Arts</td><td>Math</td><td>English</td><td>Science</td>
+              <td>
+                <button class="btn btn-sm btn-warning">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="navbar text-white mt-4">
+      <div class="container d-flex justify-content-between align-items-center py-3">
+        <span>&copy; SmashGPT 0.02 Beta.</span>
+        <ul class="nav">
+          <li class="nav-item"><a href="#" class="nav-link text-white">Privacy</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function showContent(id) {
+        const section = document.getElementById(id);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    </script>
+  </body>
+</html>
